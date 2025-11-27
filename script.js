@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
     // --- 2. دالة تسجيل الدخول بجوجل ---
@@ -112,6 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. مراقبة حالة المستخدم (عشان لو عمل ريفرش يفضل مسجل دخول) ---
     auth.onAuthStateChanged((user) => {
         updateUI(user);
+        if (user) {
+            // (جديد) أول ما يدخل، هات بيانات اليوم ده من السحاب
+            syncFromCloud(); 
+        }
     });
 
     // دالة لتحديث شكل الموقع بناء على حالة الدخول
@@ -133,7 +138,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
+    // دالة لحفظ البيانات في السحاب
+    function saveToCloud(key, data) {
+        const user = auth.currentUser;
+        if (user) {
+            // بنحفظ البيانات جوه: users -> رقم المستخدم -> data -> تاريخ اليوم
+            db.collection('users').doc(user.uid).collection('data').doc(key).set(data)
+                .then(() => {
+                    console.log("تم الحفظ في السحاب: " + key);
+                })
+                .catch((error) => {
+                    console.error("خطأ في الحفظ: ", error);
+                });
+        }
+    }
+    
     // --- Date Logic ---
     const today = new Date();
     let currentDate = new Date();
@@ -185,9 +204,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentDate.setDate(i);
                 currentDate.setMonth(month);
                 currentDate.setFullYear(year);
+                
                 updateDateDisplay();
-                renderCalendar();
-                loadData();
+                renderCalendar(); 
+                
+                if (auth.currentUser) {
+                    syncFromCloud(); 
+                } else {
+                    loadData(); 
+                }
+                
                 dateDropdown.classList.add('hidden');
             });
 
@@ -435,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         localStorage.setItem(key, JSON.stringify(data));
+        saveToCloud(key, data);
         updateGlobalScore();
     }
 
@@ -455,6 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         localStorage.setItem(key, JSON.stringify(data));
+        saveToCloud(key, data);
         updateGlobalScore();
     }
 
@@ -478,6 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         localStorage.setItem(key, JSON.stringify(extrasData));
+        saveToCloud(key, { ...extrasData });
     }
 
     // --- Loading Functions ---
@@ -638,6 +667,45 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         updateGlobalScore();
+    }
+
+    // --- (جديد) دالة جلب البيانات من السحاب ---
+    function syncFromCloud() {
+        const user = auth.currentUser;
+        if (!user) return; 
+
+        const dateKey = getStorageKey(currentDate);
+        const ibadatKey = `ibadat_data_${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+        const extrasKey = `extras_${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+
+        const docRef = db.collection('users').doc(user.uid).collection('data');
+
+        // 1. جلب البيانات الأساسية
+        docRef.doc(dateKey).get().then((doc) => {
+            if (doc.exists) {
+                localStorage.setItem(dateKey, JSON.stringify(doc.data()));
+                loadData(); 
+            }
+        });
+
+        // 2. جلب ركن العبادات
+        docRef.doc(ibadatKey).get().then((doc) => {
+            if (doc.exists) {
+                localStorage.setItem(ibadatKey, JSON.stringify(doc.data()));
+                loadIbadatData(); 
+            }
+        });
+
+        // 3. جلب النوافل الإضافية
+        docRef.doc(extrasKey).get().then((doc) => {
+            if (doc.exists) {
+                // بما أننا حفظناها كـ Object، بنرجعها لـ Array ونخزنها
+                const dataObj = doc.data();
+                const dataArray = Object.values(dataObj); 
+                localStorage.setItem(extrasKey, JSON.stringify(dataArray)); 
+                loadExtras(); 
+            }
+        });
     }
 
     // --- Event Listeners ---
@@ -932,4 +1000,5 @@ document.addEventListener('DOMContentLoaded', () => {
             warningModal.classList.add('hidden');
         }
     });
+
 });
