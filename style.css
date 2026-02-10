@@ -65,7 +65,7 @@
 }
 
 body {
-    font-family: 'Outfit', sans-serif !important;
+    font-family: 'Tajawal', sans-serif !important;
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
@@ -170,6 +170,8 @@ header {
     border-bottom: 1px solid transparent;
     box-shadow: none;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, background-color; /* يجهز المتصفح للتغيير */
+    transform: translateZ(0); /* يجبر المتصفح على استخدام GPU */
 }
 
 header.liquid-glass {
@@ -203,10 +205,32 @@ header.liquid-glass {
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* ========================================= */
+/* 2. تنسيق الأيقونات وزر القائمة (لابتوب)  */
+/* ========================================= */
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
+    position: relative; /* مهم جداً عشان القائمة تظهر تحته */
+}
+
+/* زر القائمة (مخفي افتراضياً) */
+.mobile-menu-toggle {
+    display: none; 
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* حاوية الأيقونات (ظاهرة افتراضياً) */
+.action-icons-wrapper {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
 #theme-toggle {
@@ -254,6 +278,280 @@ header.liquid-glass {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* ========================================= */
+/* تحسينات شريط الإنجاز (كبسولة الهيدر)     */
+/* ========================================= */
+
+
+
+/* ========================================= */
+/* 1. تنسيق كبسولة الإنجاز (البار)          */
+/* ========================================= */
+.header-progress-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* السطر ده بيضمن التوسيط في نص الهيدر بالضبط */
+    transform: translate(-50%, -50%) translateY(20px); 
+    
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 8px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+    white-space: nowrap;
+}
+
+/* عرض البار في الشاشات الكبيرة (لابتوب) */
+.header-progress-bar-bg {
+    width: 300px; /* عريض ومناسب */
+    height: 8px;
+    background-color: rgba(128, 128, 128, 0.25);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+.header-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-color), #3b82f6);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--accent-color);
+    transition: width 0.3s ease-out;
+}
+
+#header-progress-text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* كلاس التفعيل عند السكرول */
+header.show-progress .header-progress-container {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) translateY(0);
+}
+
+/* الوضع الليلي */
+[data-theme="dark"] .header-progress-container {
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* النص (النسبة) */
+#header-progress-text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* الشريط الملون المتحرك */
+.header-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-color), #3b82f6);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--accent-color);
+    transition: width 0.3s ease-out;
+}
+
+/* كلاس التفعيل (يضاف بالجافاسكريبت عند السكرول) */
+header.show-progress .header-progress-container {
+    opacity: 1;
+    visibility: visible;
+    /* يظهر في مكانه الطبيعي */
+    transform: translate(-50%, -50%) translateY(0);
+}
+
+/* --- إصلاح خط نصوص الأذكار والآيات --- */
+.adhkar-item span {
+    font-family: 'Amiri', serif !important; /* استخدام خط أميري المخصص للمصحف */
+    line-height: 2.2; /* زيادة المسافة بين الأسطر لمنع تداخل الرموز */
+}
+
+/* في الوضع الليلي نجعل اللون أفتح قليلاً للقراءة */
+[data-theme="dark"] .adhkar-item span {
+    color: #e2e8f0;
+}
+
+/* ========================================= */
+/* 2. الشاشات المتوسطة (التابلت: 600px - 992px) */
+/* ========================================= */
+@media (max-width: 992px) {
+    .header-progress-bar-bg {
+        width: 140px; /* تصغير العرض للنصف تقريباً */
+        height: 7px;
+    }
+    
+    .header-progress-container {
+        padding: 6px 15px; /* تقليل الحواف قليلاً */
+        gap: 10px;
+    }
+}
+
+/* ========================================= */
+/* 3. الشاشات الصغيرة (الموبايل: أقل من 600px) */
+/* ========================================= */
+/* الموبايل (أصغر من 600px) */
+@media (max-width: 600px) {
+    /* 1. نظبط البار عشان ييجي في النص ومايغطيش حاجة */
+    .header-progress-bar-bg {
+        width: 70px; /* صغير وملموم */
+        height: 6px;
+    }
+    
+    .header-progress-container {
+        padding: 5px 12px;
+        gap: 8px;
+        border-radius: 20px;
+        max-width: 50%; /* يضمن انه مايلمسش اللوجو او الزرار */
+                margin-left: -13%;
+    }
+
+    #header-progress-text {
+        font-size: 0.85rem;
+    }
+
+    /* 2. نظبط زر القائمة */
+    .mobile-menu-toggle {
+        display: flex; /* إظهار زر الـ 3 نقط */
+    }
+
+    /* 3. نخفي الأيقونات ونحولها لقائمة منسدلة */
+    .action-icons-wrapper {
+        display: none; /* إخفاء الأيقونات الأساسي */
+        
+        /* شكل القائمة لما تفتح */
+        position: absolute;
+        top: 100%;
+        left: 0; /* تظهر تحت الزرار بالظبط */
+        margin-top: 15px;
+        
+        background: var(--bg-secondary);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        
+        padding: 15px;
+        border-radius: 1rem;
+        flex-direction: column; /* الأيقونات تحت بعض */
+        gap: 15px;
+        min-width: 160px;
+        z-index: 9999;
+    }
+
+    /* الكلاس اللي بيضيفه الجافاسكريبت عشان يظهر القائمة */
+    .action-icons-wrapper.show-mobile {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+}
+
+/* أنيميشن ظهور القائمة */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+/* ملاحظة هامة: يجب جعل الأب relative ليعمل التوسيط */
+/* .header-content {
+    position: relative;
+} */
+/* Settings */
+.settings-btn {
+    background: var(--prayer-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    transition: all 0.4s ease;
+}
+
+.settings-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: rotate(90deg); /* حركة دوران لطيفة */
+    background: var(--bg-secondary);
+}
+
+.fa-sun:hover, .fa-moon:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: rotate(90deg); /* حركة دوران لطيفة */
+    background: var(--bg-secondary);
+}
+
+/* تنسيق للظهور والإخفاء */
+.settings-btn.hidden {
+    display: none !important;
+}
+
+.prayer-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--glass-border);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.prayer-item .prayer-name {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.prayer-timer {
+    font-family: 'Outfit', sans-serif; 
+    font-weight: 700;
+    font-size: 0.9rem; 
+    color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.3rem 0.8rem;
+    border-radius: 1rem;
+    border: 1px solid var(--glass-border);
+    direction: rtl; 
+    white-space: nowrap; 
+    min-width: 130px;
+    text-align: center;
+}
+
+.glass-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--glass-border);
+    background: var(--prayer-bg);
+    color: inherit;
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
 }
 
 /* --- Main Content --- */
@@ -400,7 +698,7 @@ main {
 
 .date-day.today {
     border: 1px solid #3b82f6;
-    color: #3b82f6;
+    /* color: #3b82f6; */
 }
 
 /* --- Global Progress Bar --- */
@@ -496,9 +794,9 @@ main {
     border: 1px solid var(--glass-border);
     padding: 1rem;
     border-radius: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
 }
 
 [data-theme="dark"] .task-box {
@@ -518,7 +816,7 @@ main {
     padding: 0.75rem;
     border-radius: 0.5rem;
     font-family: inherit;
-    font-weight: 600;
+    /* font-weight: 600; */
     cursor: pointer;
     text-align: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -811,6 +1109,42 @@ main {
 .modal-footer {
     margin-top: 1rem;
     text-align: center;
+}
+/* 1. ضبط الحاوية الخارجية للمودال */
+.liquid-modal, .modal-content {
+    max-height: 85vh; /* أقصى ارتفاع 85% من الشاشة */
+    display: flex;
+    flex-direction: column; /* ترتيب العناصر فوق بعض */
+    overflow: hidden; /* إخفاء الزوائد من الحاوية الرئيسية */
+}
+
+/* 2. ضبط جسم المودال (المكان اللي فيه الحقول) ليقبل السكرول */
+.modal-body {
+    flex: 1; /* يأخذ المساحة المتبقية بين الهيدر والفوتر */
+    overflow-y: auto; /* تفعيل السكرول العمودي عند الحاجة */
+    padding: 1rem; /* مسافة داخلية */
+    
+    /* تحسين شكل السكرول بار */
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-color) var(--bg-secondary);
+}
+
+/* تحسين السكرول لمتصفحات كروم */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color);
+    border-radius: 20px;
+}
+
+/* 3. التأكد من أن الهيدر والفوتر ثابتين */
+.modal-header, .modal-footer {
+    flex-shrink: 0; /* منع الانكماش */
+    z-index: 2;
 }
 
 .adhkar-list {
@@ -1222,4 +1556,1007 @@ main {
         width: 150px;
         height: 150px;
     }
+}
+
+/* --- Notifications --- */
+.notification-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    border: 2px solid var(--bg-secondary);
+}
+
+.notification-popup {
+    position: absolute;
+    top: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    background: var(--bg-secondary);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--accent-color);
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 2000;
+    text-align: right;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+
+.popup-header h4 {
+    font-size: 0.9rem;
+    color: var(--accent-color);
+}
+
+.close-small {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.popup-body {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* --- Bonus Card --- */
+.bonus-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05));
+    border: 1px solid #eab308; /* لون ذهبي */
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.bonus-icon {
+    font-size: 2rem;
+    color: #eab308;
+    background: rgba(255, 255, 255, 0.1);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.bonus-content {
+    flex: 1;
+    text-align: right;
+}
+
+.bonus-content h3 {
+    font-size: 1.1rem;
+    color: #ca8a04;
+    margin-bottom: 0.2rem;
+}
+
+.bonus-content p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.bonus-btn {
+    background-color: #ca8a04 !important; /* ذهبي غامق */
+    border-color: #eab308 !important;
+    min-width: 100px;
+}
+
+.bonus-btn.active {
+    background-color: #14532d !important; /* أخضر عند الإنجاز */
+    border-color: #22c55e !important;
+}
+
+/* تنسيق القائمة المزدوجة */
+.date-dropdown.dual-calendar {
+    width: auto; /* ليتمدد حسب المحتوى */
+    min-width: 650px; /* عرض يكفي للتقويمين */
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.calendar-section {
+    flex: 1;
+}
+
+.calendar-divider {
+    width: 1px;
+    background-color: var(--glass-border);
+    margin: 0 0.5rem;
+}
+
+/* تمييز القسم الهجري بلون مختلف قليلاً */
+.hijri-section .month-selector {
+    color: #eab308; /* لون ذهبي للهجري */
+}
+
+.hijri-section .date-day.today {
+    border-color: #eab308;
+    color: #eab308;
+}
+
+.hijri-section .date-day.active {
+    background-color: #eab308;
+    color: #fff;
+}
+
+/* استجابة للشاشات الصغيرة (موبايل) */
+@media (max-width: 768px) {
+    .date-dropdown.dual-calendar {
+        flex-direction: column;
+        min-width: 300px;
+        width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .calendar-divider {
+        height: 1px;
+        width: 100%;
+        margin: 1rem 0;
+    }
+}
+
+/* --- تنسيقات العداد وأيقونة الفضل --- */
+.adhkar-item {
+    flex-wrap: wrap; /* للسماح بالعناصر بالنزول لسطر جديد */
+    position: relative;
+}
+
+.adhkar-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.adhkar-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 5px;
+    width: 100%;
+}
+
+/* زر العداد */
+.counter-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-color);
+    color: var(--text-primary);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.counter-btn:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+.counter-btn.completed {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+/* --- تنسيق حاوية الأيقونة --- */
+.info-wrapper {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    margin-right: 8px; /* مسافة بين الأيقونة والزر */
+}
+
+/* --- تنسيق صندوق الفضل (Tooltip) --- */
+.fadl-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    
+    /* التموضع: يظهر فوق الأيقونة */
+    position: absolute;
+    bottom: 140%; /* يرفع الصندوق للأعلى */
+    left: 50%;
+    transform: translateX(-50%); /* يجعله في المنتصف تماماً */
+    
+    /* الحجم والنصوص */
+    width: max-content;  /* العرض حسب المحتوى */
+    max-width: 250px;    /* أقصى عرض حتى لا يخرج عن الشاشة (مهم جداً) */
+    white-space: normal; /* يسمح للنص بالنزول لسطر جديد */
+    
+    /* الشكل والألوان */
+    background-color: #333; /* لون خلفية غامق ليكون واضحاً */
+    color: #fff;            /* لون النص أبيض */
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    
+    /* الطبقات والظل */
+    z-index: 999999999999999; /* رقم كبير ليظهر فوق كل العناصر والمودال */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    
+    /* تأثير الحركة */
+    transition: opacity 0.3s ease, bottom 0.3s ease;
+    pointer-events: none; /* لمنع الماوس من التفاعل مع النص نفسه */
+}
+
+/* --- السهم الصغير أسفل الصندوق --- */
+.fadl-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* أسفل الصندوق مباشرة */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+/* --- عند التمرير (Hover) --- */
+.info-wrapper:hover .fadl-tooltip {
+    visibility: visible;
+    opacity: 1;
+    bottom: 150%; /* حركة بسيطة للأعلى عند الظهور */
+}
+
+/* في الوضع الليلي */
+[data-theme="dark"] .fadl-tooltip {
+    background-color: #f0f4f8;
+    color: #1a1a1a;
+}
+[data-theme="dark"] .fadl-tooltip::after {
+    border-color: #f0f4f8 transparent transparent transparent;
+}
+
+.bonus-card{
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+/* --- تنسيق صندوق الفضل العائم (الجديد) --- */
+.fadl-tooltip-global {
+    position: fixed; /* يجعله يظهر فوق أي نافذة مهما كانت */
+    top: 0;
+    left: 0;
+    background-color: rgba(30, 41, 59, 0.95); /* لون غامق وشفاف قليلاً */
+    color: #fff;
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    z-index: 999999; /* طبقة عالية جداً */
+    max-width: 300px; /* أقصى عرض */
+    width: max-content;
+    display: none; /* مخفي افتراضياً */
+    pointer-events: none; /* لا يعيق حركة الماوس */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: normal; /* يسمح للنص بالنزول لسطر جديد */
+    backdrop-filter: blur(5px);
+}
+
+#daily-verse {
+    font-family: 'Amiri', serif !important; /* خط نسخ مصحفي */
+    font-size: 2.2rem; /* تكبير الخط للآية */
+    line-height: 2; /* زيادة الارتفاع عشان التشكيل مايدخلش في بعضه */
+    margin-bottom: 2.5rem;
+    font-weight: 700; /* تعريض الخط */
+    color: #eab308; /* لون ذهبي خفيف يليق بالآيات (اختياري) */
+    text-shadow: 0 4px 15px rgba(0,0,0,0.2); /* ظل خفيف يعطي فخامة */
+}
+
+/* 3. تحسين شكل الاقتباسات في المودال (القرآن والحديث) */
+.quran-quote p, .hadith-quote p {
+    font-family: 'Amiri', serif !important;
+    font-size: 1.3rem;
+    line-height: 2;
+}
+
+/* --- تنسيقات نافذة التحذيرات المطور --- */
+
+/* العناوين الصغيرة */
+.mini-title {
+    color: #ef4444; /* لون أحمر للتحذير */
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* صندوق التعريف */
+.definition-box {
+    background: rgba(239, 68, 68, 0.1); /* خلفية حمراء خفيفة */
+    border-left: 3px solid #ef4444;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    text-align: right;
+}
+
+.definition-box p {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* صندوق المثال اليومي */
+.daily-example-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed var(--text-secondary);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-align: right;
+}
+
+#warning-daily-example {
+    font-style: italic;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* زر وقسم القصة */
+.story-section {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 1rem;
+}
+
+.story-btn {
+    width: 100%;
+    background-color: #7f1d1d !important; /* لون أحمر غامق */
+    border: 1px solid #ef4444 !important;
+}
+
+.story-content {
+    margin-top: 1rem;
+    background: var(--bg-primary);
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--glass-border);
+    animation: fadeIn 0.5s ease;
+}
+
+#story-text {
+    font-family: 'Amiri', serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    text-align: justify;
+    /* هذا السطر الجديد للأنيميشن */
+    transition: opacity 0.3s ease; 
+}
+/* --- تنسيقات قسم الإحصائيات --- */
+
+/* أزرار الفلتر */
+.filter-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 5px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.filter-btn.active {
+    background: var(--bg-primary);
+    color: var(--accent-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* شبكة الكروت الصغيرة */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 1rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    background: rgba(79, 70, 229, 0.1);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.stat-info h4 {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.stat-info span {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+/* حاوية الشارتات */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* .chart-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 1rem;
+    border-radius: 1rem;
+    min-height: 250px;
+}
+
+.chart-box h4 {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+} */
+ /* --- إصلاح مشكلة تمدد الشارت --- */
+/* تنسيق الصندوق الخارجي */
+.chart-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 1rem;
+    margin-top: 2rem; /* مسافة فاصلة بين كل قسم والآخر */
+    border-radius: 1rem;
+    /* height: 350px;       الارتفاع الثابت */
+    display: flex;       /* تفعيل الفليكس */
+    flex-direction: column; /* ترتيب العناصر تحت بعض */
+    overflow: hidden;    /* إخفاء الزوائد */
+}
+
+/* تنسيق العنوان لكي لا ينكمش */
+.chart-box h4 {
+    margin-bottom: 1rem;
+    flex-shrink: 0; 
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 1 rem;
+}
+
+/* (هام جداً) كلاس الحاوية الجديدة التي سننشئها بالجافاسكريبت */
+.chart-wrapper {
+    flex: 1;             /* تأخذ المساحة المتبقية فقط */
+    min-height: 0;       /* ضروري جداً ليعمل الفليكس بشكل صحيح */
+    position: relative;  /* لتحديد أبعاد الشارت بدقة */
+    width: 100%;
+}
+/* تنسيق الكانفاس نفسه عشان يحترم الأب */
+/* تحليل العادات */
+.analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.analysis-box {
+    padding: 1rem;
+    border-radius: 1rem;
+    background: rgba(255,255,255,0.05);
+}
+
+.analysis-box.strength { border-right: 3px solid #10b981; }
+.analysis-box.weakness { border-right: 3px solid #ef4444; }
+
+.analysis-box h4 {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.analysis-box.strength h4 { color: #10b981; }
+.analysis-box.weakness h4 { color: #ef4444; }
+
+.analysis-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+.analysis-box li {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+@media (max-width: 600px) {
+    .analysis-grid { grid-template-columns: 1fr; }
+    .charts-container { grid-template-columns: 1fr; }
+}
+/* --- تنسيق جدول التحليلات --- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; /* يسمح بالسكرول الجانبي في الموبايل */
+}
+/* ========================================= */
+/* تخصيص شكل السكرول بار (Scrollbar Styling) */
+/* ========================================= */
+
+/* 1. تخصيص العرض والارتفاع (للمتصفحات المبنية على WebKit زي Chrome/Edge) */
+.table-responsive::-webkit-scrollbar {
+    height: 8px; /* ارتفاع السكرول الأفقي */
+    width: 8px;  /* عرض السكرول الرأسي (لو موجود) */
+}
+
+/* 2. المسار (الخلفية اللي بيمشي فيها السكرول) */
+.table-responsive::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1); /* لون غامق شفاف جداً */
+    border-radius: 10px;
+    margin: 2px; /* مسافة عشان ميبقاش لازق في الحواف */
+}
+
+/* 3. المقبض (الجزء اللي بيتحرك) */
+.table-responsive::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2); /* لون أبيض شفاف (شيك في الـ Dark Mode) */
+    border-radius: 10px;
+    border: 2px solid transparent; /* خدعة عشان يبان أرفع */
+    background-clip: content-box;
+}
+
+/* 4. لما الماوس ييجي عليه */
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color); /* ينور بلون الموقع الأساسي */
+    border: 0; /* يشيل الحدود عشان يبان أعرض وتعرف تمسكه */
+}
+
+/* 5. دعم متصفح Firefox */
+.table-responsive {
+    scrollbar-width: thin; /* رفيع */
+    scrollbar-color: var(--accent-color) rgba(0, 0, 0, 0.1); /* لون المقبض + لون المسار */
+}
+
+/* --- Tabs Styling --- */
+.tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.tab-btn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 12px var(--accent-glass);
+}
+
+.tab-content {
+    display: none; /* Hide all by default */
+    width: 100%;
+    animation: fadeInTab 0.4s ease;
+}
+
+.tab-content.active {
+    display: block; /* Show only active */
+}
+
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* تحسين للجداول */
+.analytics-table th {
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+    white-space: nowrap;
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* ضمان عرض مناسب للأعمدة */
+}
+
+.analytics-table th, 
+.analytics-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.analytics-table th {
+    background-color: rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    color: var(--accent-color);
+    white-space: nowrap;
+}
+
+/* تلوين الصفوف الفردية بشكل خفيف */
+.analytics-table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* تمييز عمود الإنجاز العام */
+.analytics-table td:nth-child(2) {
+    font-weight: bold;
+    background-color: rgba(79, 70, 229, 0.05);
+}
+
+/* في الوضع الليلي */
+[data-theme="dark"] .analytics-table th {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* --- تنسيقات تقرير PDF --- */
+.pdf-page {
+    background-color: #ffffff;
+    color: #1f2937;
+    font-family: 'Tajawal', sans-serif;
+    padding: 40px;
+    width: 100%; /* العرض الفعلي سيحدده html2pdf */
+    box-sizing: border-box;
+    direction: rtl;
+}
+
+#report-template-container {
+    /* خدعة لجعل العنصر مرئياً للمتصفح ولكنه مخفي خلف المحتوى */
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    z-index: -9999 !important;
+    width: 800px !important; /* عرض ثابت للـ A4 */
+    opacity: 0; /* مخفي بصرياً لكن موجود */
+    pointer-events: none;
+}
+/* تنسيقات التقرير التفصيلي */
+.detail-tag {
+    display: inline-block;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    margin-bottom: 3px;
+    border: 1px solid transparent;
+}
+
+.detail-tag.full {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+
+.detail-tag.half {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+.detail-tag.missed {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.detail-tag.bonus {
+    background-color: #e0e7ff;
+    color: #3730a3;
+    font-weight: bold;
+}
+
+.pdf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #4f46e5;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.pdf-title {
+    color: #4f46e5;
+    font-size: 24px;
+    margin: 0;
+}
+
+.pdf-subtitle {
+    color: #6b7280;
+    margin: 5px 0 0;
+}
+
+.score-circle {
+    width: 60px;
+    height: 60px;
+    background: #4f46e5;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 5px;
+}
+
+.header-score {
+    text-align: center;
+    font-size: 14px;
+    color: #4f46e5;
+    font-weight: bold;
+}
+
+.pdf-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: #f3f4f6;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+
+.summary-card .label {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.summary-card .value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #111827;
+}
+
+.pdf-charts-section {
+    margin-bottom: 30px;
+    page-break-inside: avoid; /* يمنع قص الشارت بين صفحتين */
+}
+
+.pdf-charts-section h3, .pdf-details-section h3 {
+    color: #4f46e5;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.charts-wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.pdf-chart-img {
+    width: 48%; /* صورتين جنب بعض */
+    height: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: white; /* مهم عشان الشفافية */
+}
+
+/* جدول التفاصيل */
+.pdf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.pdf-table th {
+    background-color: #4f46e5;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+.pdf-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+.pdf-table tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+/* تحسين عرض الإنجازات داخل الجدول */
+.detail-item {
+    display: inline-block;
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin: 2px;
+    font-size: 11px;
+}
+
+.detail-item.missed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.pdf-footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 10px;
+    color: #9ca3af;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 10px;
+}
+
+/* تنسيقات التقرير الذكي */
+.trend-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #ddd;
+}
+.trend-item:last-child { border-bottom: none; }
+
+.trend-up { color: #10b981; font-weight: bold; } /* أخضر */
+.trend-down { color: #ef4444; font-weight: bold; } /* أحمر */
+.trend-neutral { color: #6b7280; } /* رمادي */
+
+.smart-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    background: #f3f4f6;
+}
+
+/* تحسينات الأداء القصوى للموبايل */
+@media (max-width: 768px) {
+  /* 1. إيقاف الخلفية المتحركة الثقيلة */
+  .liquid-background {
+    display: none; /* إخفاء البلوجز المتحركة */
+  }
+  body {
+    /* استبدالها بلون ثابت أو تدرج خفيف جداً */
+    background: var(--bg-primary); 
+  }
+
+  /* 2. إيقاف تأثير الزجاج الثقيل */
+  *, .prayer-item, .glass-footer, header.liquid-glass, .liquid-modal {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important; /* الظلال أيضاً ثقيلة */
+  }
+
+  /* 3. تعويض الشكل بخلفية صلبة قليلاً */
+  .prayer-item, .glass-footer, .liquid-modal {
+    background: var(--bg-secondary) !important;
+    opacity: 1 !important;
+    border: 1px solid var(--glass-border);
+  }
+  
+  /* 4. إيقاف انيميشن AOS على الموبايل (يسبب تقطيع عند السكرول) */
+  [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+/* تنسيقات الجولة التعريفية */
+.driver-popover {
+    font-family: 'Tajawal', sans-serif !important;
+    direction: rtl;
+    text-align: right;
+    border-radius: 15px;
+    background-color: var(--bg-secondary) !important;
+    backdrop-filter: blur(10px);
+    color: var(--text-primary) !important;
+}
+
+.driver-popover-title {
+    font-size: 1.1rem !important;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.driver-popover-description {
+    font-size: 0.95rem !important;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* أزرار التنقل في الجولة */
+.driver-popover-footer button {
+    font-family: 'Tajawal', sans-serif !important;
+    border-radius: 8px !important;
+    padding: 5px 12px !important;
+}
+
+.driver-popover-next-btn {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    border: none !important;
+    text-shadow: none !important; 
+}
+
+.driver-popover-prev-btn {
+    color: var(--text-secondary) !important;
+    background: transparent !important;
+    border: 1px solid var(--glass-border) !important;
 }
