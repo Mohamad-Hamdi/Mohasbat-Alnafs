@@ -3403,16 +3403,22 @@ function getRandomMotivation(type) {
 //  نظام الجولة التعريفية الشامل (Driver.js)
 // =========================================
 
+// =========================================
+//  1. نظام الجولة التعريفية الشامل (Onboarding Tour)
+// =========================================
+
 function startAppTour() {
     const driver = window.driver.js.driver;
 
-    // التأكد من فتح قائمة الموبايل إذا كانت الشاشة صغيرة لتظهر الأزرار
+    // --- تجهيز المسرح للجولة ---
+    
+    // أ) فتح قائمة الموبايل لكي تظهر الأزرار المخفية
     if (window.innerWidth < 600) {
         const actionIcons = document.getElementById('action-icons');
         if(actionIcons) actionIcons.classList.add('show-mobile');
     }
 
-    // التأكد من ظهور قسم البونص مؤقتاً للشرح (حتى لو كان مخفياً)
+    // ب) إظهار قسم البونص مؤقتاً للشرح (حتى لو لم يكن هناك بونص اليوم)
     const bonusSection = document.getElementById('bonus-section');
     let wasBonusHidden = false;
     if (bonusSection && bonusSection.classList.contains('hidden')) {
@@ -3420,6 +3426,7 @@ function startAppTour() {
         wasBonusHidden = true;
     }
 
+    // ج) تعريف خطوات الجولة
     const driverObj = driver({
         showProgress: true,
         animate: true,
@@ -3429,56 +3436,55 @@ function startAppTour() {
         prevBtnText: 'السابق',
         progressText: '{{current}} من {{total}}',
         
-        // إعادة الأمور لطبيعتها عند الإغلاق
+        // --- تنظيف المسرح عند الإغلاق ---
         onDestroyed: () => {
-            localStorage.setItem('tour_seen_v2', 'true'); // v2 عشان لو حد شاف القديمة يشوف الجديدة
+            localStorage.setItem('tour_seen_v2', 'true'); // تسجيل أن المستخدم رأى التحديث الجديد
+            
+            // إغلاق قائمة الموبايل
             if (window.innerWidth < 600) {
                 document.getElementById('action-icons')?.classList.remove('show-mobile');
             }
+            // إخفاء البونص إذا كان مخفياً أصلاً
             if (wasBonusHidden && bonusSection) {
                 bonusSection.classList.add('hidden');
             }
         },
 
         steps: [
-            // 1. الترحيب والتاريخ الهجري
+            // 1. التاريخ الهجري والميلادي
             { 
                 element: '#date-toggle-btn', 
                 popover: { 
-                    title: '📅 التقويم الهجري والميلادي', 
-                    description: 'تم دمج التاريخ الهجري بدقة. اضغط هنا للتبديل بين التقويمين ومعرفة الأيام البيض والمواسم الفاضلة.', 
-                    side: "bottom", 
-                    align: 'center' 
+                    title: '📅 التقويم الهجري المدمج', 
+                    description: 'تمت إضافة التاريخ الهجري. اضغط هنا للتبديل بين التقويمين ومعرفة الأيام البيض والمواسم الفاضلة.', 
+                    side: "bottom", align: 'center' 
                 } 
             },
             // 2. المواقيت الجغرافية
             { 
-                element: '.prayer-timer', // يشير لأول عداد وقت يقابله
+                element: '.prayer-timer', 
                 popover: { 
-                    title: '📍 مواقيت دقيقة لموقعك', 
-                    description: 'العد التنازلي للصلوات يتم حسابه الآن بناءً على موقعك الجغرافي الفعلي (GPS) لضمان الدقة.', 
-                    side: "left", 
-                    align: 'start' 
+                    title: '📍 المدة المتبقية بدقة', 
+                    description: 'يتم الآن حساب الوقت المتبقي للصلاة بناءً على موقعك الجغرافي الفعلي (GPS) لضمان الدقة التامة.', 
+                    side: "left", align: 'start' 
                 } 
             },
             // 3. البونص والعبادات الموسمية
             { 
                 element: '#bonus-section', 
                 popover: { 
-                    title: '⭐ عبادات خاصة (بونص)', 
-                    description: 'في الأيام الفاضلة (مثل الإثنين، الخميس، الأيام البيض) سيظهر لك هذا القسم تلقائياً، وسنرسل لك تذكيراً بها لتغتنم أجرها.', 
-                    side: "top", 
-                    align: 'center' 
+                    title: '⭐ عبادات المواسم (بونص)', 
+                    description: 'في الأيام الفاضلة (مثل الإثنين، الخميس، عاشوراء) سيظهر لك هذا القسم تلقائياً مع تنبيه لتغتنم الأجر.', 
+                    side: "top", align: 'center' 
                 } 
             },
-            // 4. تحسينات الأذكار (شرح نظري لأن المودال مغلق)
+            // 4. تحسينات الأذكار (العداد + الثواب)
             { 
-                element: '.action-btn', // يشير لزر "عرض الأذكار"
+                element: '#fajr-card .action-btn', // يشير لزر أذكار الفجر كمثال
                 popover: { 
-                    title: '📿 تحسينات الأذكار', 
-                    description: 'عند فتح الأذكار، ستجد الآن:<br>1. <b>عداد تفاعلي</b> لكل ذكر.<br>2. <b>علامة استفهام</b> عند الوقوف عليها يظهر لك ثواب هذا الذكر وفضله.', 
-                    side: "bottom", 
-                    align: 'center' 
+                    title: '📿 العدادات وثواب الأعمال', 
+                    description: 'داخل الأذكار، أضفنا <b>عداداً تفاعلياً</b>، وستجد <b>علامة استفهام</b> عند الوقوف عليها يظهر لك ثواب هذا الذكر وفضله.', 
+                    side: "bottom", align: 'center' 
                 } 
             },
             // 5. الإحصائيات
@@ -3486,9 +3492,8 @@ function startAppTour() {
                 element: '#analytics-btn', 
                 popover: { 
                     title: '📊 الإحصائيات والتقدم', 
-                    description: 'قسم جديد كلياً! تابع أداءك أسبوعياً وشهرياً، واعرف نقاط قوتك وقصورك لتعالجها بالأرقام والرسوم البيانية.', 
-                    side: "bottom", 
-                    align: 'center' 
+                    description: 'قسم جديد كلياً! تابع أداءك أسبوعياً وشهرياً، واعرف نقاط قوتك وقصورك لتعالجها بالأرقام.', 
+                    side: "bottom", align: 'center' 
                 } 
             },
             // 6. التنبيهات
@@ -3496,29 +3501,26 @@ function startAppTour() {
                 element: '#notification-btn', 
                 popover: { 
                     title: '🔔 التنبيهات الذكية', 
-                    description: 'لتعمل المذكرة بكفاءة، اضغط هنا ووافق على إذن الإشعارات في المتصفح لنذكرك بالصلوات والعبادات الموسمية.', 
-                    side: "bottom", 
-                    align: 'center' 
+                    description: 'وافق على إذن الإشعارات لنذكرك بعبادات الغد (مثل صيام الخميس) والصلوات في وقتها.', 
+                    side: "bottom", align: 'center' 
                 } 
             },
             // 7. قسم المهلكات والقصص
             { 
                 element: '.warning-section', 
                 popover: { 
-                    title: '⚠️ المهلكات وقصص السيرة', 
-                    description: 'تم تطوير هذا القسم ليشمل تعريفاً بالمخاطر (كالغيبة والكذب) مع <b>قصص من السيرة النبوية</b> تتغير لتتعظ وتعتبر.', 
-                    side: "top", 
-                    align: 'center' 
+                    title: '⚠️ قصص السيرة والمهلكات', 
+                    description: 'تم تطوير هذا القسم ليشمل تعريفاً بالمخاطر (كالغيبة والكذب) مع <b>قصص من السيرة النبوية</b> تتغير يومياً للعظة.', 
+                    side: "top", align: 'center' 
                 } 
             },
             // 8. الإعدادات (أهم خطوة)
             { 
                 element: '#settings-btn', 
                 popover: { 
-                    title: '⚙️ إعداداتك الشخصية (هام جداً)', 
-                    description: 'من هنا يمكنك:<br>1. تحديد <b>جنسك</b> (لتخصيص أحكام الصلاة).<br>2. تحديد <b>مستواك</b> (مبتدئ/مجتهد) لضبط كمية الأذكار.<br>3. اختيار <b>مواعيد التنبيه</b> التي تناسب يومك.', 
-                    side: "bottom", 
-                    align: 'start' 
+                    title: '⚙️ خصص تجربتك', 
+                    description: 'من هنا حدد:<br>1. <b>جنسك</b> (لأحكام الصلاة).<br>2. <b>مستواك</b> (مبتدئ/مجتهد) لضبط كمية الأذكار.<br>3. <b>مواعيد التنبيه</b> التي تفضلها.', 
+                    side: "bottom", align: 'start' 
                 } 
             }
         ]
@@ -3527,51 +3529,96 @@ function startAppTour() {
     driverObj.drive();
 }
 
-// تشغيل الجولة بتأخير بسيط لضمان تحميل العناصر
-setTimeout(() => {
-    // نغير المفتاح لـ v2 عشان المستخدمين القدامى يشوفوا التحديثات الجديدة
-    if (!localStorage.getItem('tour_seen_v2')) {
-        startAppTour();
-    }
-}, 2000);
+// =========================================
+//  2. نظام المحلل الذكي (Daily Smart Analysis)
+// =========================================
 
-// تشغيل الجولة فقط إذا لم يرها المستخدم من قبل
-// نضع مهلة بسيطة 1.5 ثانية ليتأكد المستخدم أن الموقع فتح
-setTimeout(() => {
-    if (!localStorage.getItem('tour_seen')) {
-        // إذا كان موبايل، نفتح القائمة أولاً عشان الأزرار تبان
-        if (window.innerWidth < 600) {
-            const actionIcons = document.getElementById('action-icons');
-            if(actionIcons) actionIcons.classList.add('show-mobile');
-        }
+function runDailyAnalysis(force = false) {
+    const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const lastCheck = localStorage.getItem('last_smart_check_date');
+    
+    // لو لم يتم الفحص اليوم، أو لو تم إجبار الدالة (للاختبار)
+    if (lastCheck !== todayStr || force) {
         
-        startAppTour();
-    }
-}, 1500);
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        const dayBefore = new Date(); dayBefore.setDate(dayBefore.getDate() - 2);
 
-// إضافة زر "شرح الموقع" داخل الإعدادات (اختياري) لكي يعيد الجولة متى أراد
-const setupModalBody = document.querySelector('#setup-modal .modal-body');
-if(setupModalBody) {
-    // نتأكد إننا لم نضفه من قبل
-    if(!document.getElementById('restart-tour-btn')) {
-        const restartBtn = document.createElement('button');
-        restartBtn.id = 'restart-tour-btn';
-        restartBtn.className = 'btn-primary';
-        restartBtn.style.marginTop = '1rem';
-        restartBtn.style.width = '100%';
-        restartBtn.style.background = '#0891b2'; // لون مختلف (سماوي)
-        restartBtn.innerHTML = '<i class="fa-solid fa-circle-info"></i> تشغيل الجولة التعريفية';
-        
-        restartBtn.onclick = () => {
-            document.getElementById('setup-modal').classList.add('hidden'); // إغلاق المودال
-            // فتح القائمة في الموبايل
-            if (window.innerWidth < 600) {
-                document.getElementById('action-icons').classList.add('show-mobile');
+        // (دالة getStoredStats و analyzeBreakdown يجب أن تكون معرفة في الجزء العلوي من ملفك)
+        // إذا لم تكن معرفة، تأكد من نسخها من الردود السابقة
+        if(typeof getStoredStats !== 'function') return; 
+
+        const dataYest = getStoredStats(yesterday);
+        const dataBefore = getStoredStats(dayBefore);
+
+        let title, body, icon, analysis = [];
+
+        if (!dataYest) {
+            icon = "👋";
+            title = "افتقدناك بالأمس!";
+            body = "لم نجد سجلاً ليوم أمس. لا بأس، المهم أنك هنا اليوم. جدد النية وابدأ صفحة جديدة.";
+        } else {
+            const scoreYest = dataYest.totalScore || 0;
+            const scoreBefore = dataBefore ? (dataBefore.totalScore || 0) : 0;
+            const diff = scoreYest - scoreBefore;
+
+            analysis = typeof analyzeBreakdown === 'function' ? analyzeBreakdown(dataYest.breakdown, dataBefore?.breakdown) : [];
+
+            if (scoreYest === 0) {
+                icon = "😔"; title = "يومك كان فارغاً!"; body = "سجلت الدخول أمس لكنك لم تنجز شيئاً. الأيام تمضي، فلا تتركها تسرقك.";
+            } else if (diff > 0) {
+                icon = "🏆"; title = `أحسنت! تقدمت بنسبة ${diff}%`; body = `أداؤك أمس (${scoreYest}%) كان أفضل من اليوم الذي قبله.`;
+            } else if (diff < 0) {
+                icon = "📉"; title = `تراجع بسيط (${Math.abs(diff)}%-)`; body = `أداؤك أمس (${scoreYest}%) كان أقل من قبله. استدرك ما فاتك.`;
+            } else {
+                icon = "⚖️"; title = "مستواك ثابت"; body = `حافظت على نفس المستوى (${scoreYest}%). الثبات جيد، لكن المؤمن يطمح للزيادة.`;
             }
-            startAppTour();
-        };
-        
-        setupModalBody.appendChild(restartBtn);
+        }
+
+        // عرض النافذة (دالة showSmartPopup من الردود السابقة)
+        if(typeof showSmartPopup === 'function') showSmartPopup(icon, title, body, analysis);
+
+        // تسجيل الفحص
+        if (!force) localStorage.setItem('last_smart_check_date', todayStr);
     }
 }
 
+// =========================================
+//  3. المايسترو (التحكم في بدء التشغيل)
+// =========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // إضافة زر "إعادة الجولة" داخل قائمة الإعدادات (مرة واحدة)
+    const setupModalBody = document.querySelector('#setup-modal .modal-body');
+    if(setupModalBody && !document.getElementById('restart-tour-btn')) {
+        const restartBtn = document.createElement('button');
+        restartBtn.id = 'restart-tour-btn';
+        restartBtn.className = 'btn-primary';
+        restartBtn.style.cssText = 'margin-top: 1rem; width: 100%; background: #0891b2;';
+        restartBtn.innerHTML = '<i class="fa-solid fa-circle-info"></i> تشغيل الجولة التعريفية';
+        
+        restartBtn.onclick = () => {
+            document.getElementById('setup-modal').classList.add('hidden');
+            if (window.innerWidth < 600) document.getElementById('action-icons').classList.add('show-mobile');
+            startAppTour();
+        };
+        setupModalBody.appendChild(restartBtn);
+    }
+
+    // --- منطق التشغيل الرئيسي ---
+    const tourSeen = localStorage.getItem('tour_seen_v2');
+    
+    if (!tourSeen) {
+        // الحالة 1: المستخدم يفتح لأول مرة بعد التحديث -> شغل الجولة
+        setTimeout(startAppTour, 1500);
+        // منع ظهور رسالة "افتقدناك" في هذا اليوم لعدم التشتيت
+        const todayStr = new Date().toLocaleDateString('en-CA');
+        localStorage.setItem('last_smart_check_date', todayStr);
+
+    } else {
+        // الحالة 2: المستخدم قديم -> شغل المحلل الذكي
+        setTimeout(() => {
+            if (typeof runDailyAnalysis === 'function') runDailyAnalysis(); 
+        }, 2000);
+    }
+});
